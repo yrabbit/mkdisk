@@ -16,7 +16,6 @@ mkdisk.ps: mkdisk.dvi
 	dvips -j0 mkdisk.dvi -o
 
 mkdisk.dvi: mkdisk.tex
-	echo '\input cwebmac-ru' >macro.tex
 	$(TEX) mkdisk.tex
 
 mkdisk.tex: mkdisk.w

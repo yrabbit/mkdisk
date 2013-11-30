@@ -18,7 +18,6 @@ mkdisk.dvi: mkdisk.tex
 	$(TEX) mkdisk.tex
 
 mkdisk.tex: mkdisk.w
-	echo '\input cwebmac-ru' >macro.tex
 	$(CWEAVE) mkdisk.w
 
 linkbk: mkdisk.c
