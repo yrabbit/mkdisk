@@ -2,7 +2,7 @@
 #line 24 "mkdisk.w"
 
 /*22:*/
-#line 310 "mkdisk.w"
+#line 320 "mkdisk.w"
 
 #include <string.h> 
 #include <stdlib.h> 
@@ -47,7 +47,7 @@
 #line 26 "mkdisk.w"
 
 /*15:*/
-#line 224 "mkdisk.w"
+#line 234 "mkdisk.w"
 
 const char*argp_program_version= "mkdisk, "VERSION;
 const char*argp_program_bug_address= "<yellowrabbit@bk.ru>";
@@ -85,7 +85,7 @@ uint16_t len;
 }DirRecord;
 
 /*:10*//*18:*/
-#line 246 "mkdisk.w"
+#line 256 "mkdisk.w"
 
 typedef struct _Arguments{
 int verbosity;
@@ -109,21 +109,21 @@ static int cur_src;
 static iconv_t cd;
 
 /*:9*//*13:*/
-#line 211 "mkdisk.w"
+#line 221 "mkdisk.w"
 
 static void handleOneFile(FILE*,FILE*);
 static int createDir(FILE*);
 static uint8_t buf[BLOCK_SIZE];
-static DirRecord dir[MKDOS_NUM_FILES];
+static DirRecord dir[MKDOS_NUM_FILES+1];
 static unsigned int total_size;
 
 /*:13*//*16:*/
-#line 228 "mkdisk.w"
+#line 238 "mkdisk.w"
 
 static char argp_program_doc[]= "Make MKDOS disk image";
 
 /*:16*//*17:*/
-#line 236 "mkdisk.w"
+#line 246 "mkdisk.w"
 
 static struct argp_option options[]= {
 {"output",'o',"FILENAME",0,"Output filename"},
@@ -134,13 +134,13 @@ static error_t parse_opt(int,char*,struct argp_state*);
 static struct argp argp= {options,parse_opt,NULL,argp_program_doc};
 
 /*:17*//*19:*/
-#line 255 "mkdisk.w"
+#line 265 "mkdisk.w"
 
 static Arguments config= {0,{0},0,NULL,};
 
 
 /*:19*//*23:*/
-#line 326 "mkdisk.w"
+#line 336 "mkdisk.w"
 
 #define PRINTVERB(level, fmt, a...) (((config.verbosity) >= level) ? printf(\
   (fmt), ## a) : 0)
@@ -165,7 +165,7 @@ const char*srcname;
 int i;
 
 /*21:*/
-#line 297 "mkdisk.w"
+#line 307 "mkdisk.w"
 
 argp_parse(&argp,argc,argv,0,0,&config);
 if(config.srcnames==NULL){
@@ -256,6 +256,7 @@ return(0);
 
 static int createDir(FILE*fresult){
 DiskHeader*hdr;
+uint16_t first_free_block,free_area_len;
 int i;
 
 
@@ -275,11 +276,20 @@ fwrite(buf,sizeof(DiskHeader),1,fresult);
 for(i= 0;i<config.num_src;++i){
 fwrite(dir+i,sizeof(DirRecord),1,fresult);
 }
+
+
+
+first_free_block= dir[i-1].block+dir[i-1].block_len;
+free_area_len= DISK_SIZE-DISK_CATALOG_SIZE-first_free_block;
+dir[i].block= first_free_block;
+dir[i].block_len= free_area_len;
+fwrite(dir+i,sizeof(DirRecord),1,fresult);
+
 return(0);
 }
 
 /*:11*//*12:*/
-#line 170 "mkdisk.w"
+#line 180 "mkdisk.w"
 
 static void
 handleOneFile(FILE*fsrc,FILE*fresult){
@@ -321,7 +331,7 @@ strncpy(dir[cur_src].name,name,MKDOS_MAX_NAME_LEN);
 }
 
 /*:12*//*20:*/
-#line 261 "mkdisk.w"
+#line 271 "mkdisk.w"
 
 static error_t
 parse_opt(int key,char*arg,struct argp_state*state){

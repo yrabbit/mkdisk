@@ -143,6 +143,7 @@ typedef struct _DirRecord {
 @c
 static int createDir(FILE *fresult) {
 	DiskHeader *hdr;
+	uint16_t first_free_block, free_area_len;
 	int i;
 
 	/* пишем 0-ой блок */
@@ -162,6 +163,15 @@ static int createDir(FILE *fresult) {
 	for (i = 0; i < config.num_src; ++i) {
 		fwrite(dir + i, sizeof(DirRecord), 1, fresult);
 	}
+	/* Заполняем признак конца каталога: все 0,
+	 кроме полей |block| = номер первого свободного блока и |block_len| = длина
+	 свободного места */
+	first_free_block = dir[i - 1].block + dir[i - 1].block_len;
+	free_area_len = DISK_SIZE - DISK_CATALOG_SIZE - first_free_block;
+	dir[i].block = first_free_block;
+	dir[i].block_len = free_area_len;
+	fwrite(dir + i, sizeof(DirRecord), 1, fresult);
+
 	return(0);
 }
 
@@ -212,7 +222,7 @@ handleOneFile(FILE *fsrc, FILE *fresult) {
 static void handleOneFile(FILE *, FILE *);
 static int createDir(FILE *);
 static uint8_t buf[BLOCK_SIZE];
-static DirRecord dir[MKDOS_NUM_FILES];	/* Каталог диска */
+static DirRecord dir[MKDOS_NUM_FILES + 1 ];	/* Каталог диска */
 static unsigned int total_size;	/* Общее число блоков в файлах */
 
 @* Разбор параметров командной строки.
