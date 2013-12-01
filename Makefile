@@ -30,4 +30,3 @@ clean:
 	-rm -Rf *.c *.o link
 	-rm -Rf *.tex *.aux *.log *.toc *.idx *.scn *.dvi *.pdf *.ps
 
-
